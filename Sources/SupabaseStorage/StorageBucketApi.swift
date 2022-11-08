@@ -61,6 +61,13 @@ public class StorageBucketApi: StorageApi {
   ///
   /// > Public buckets don't require an authorization token to download objects, but still require a valid token for all other operations. By default, buckets are private.
   ///
+  /// # Example
+  /// Get the bucket named "avatars":
+  ///
+  /// ```swift
+  /// var bucketID = storage.getBucket(id: "avatars")
+  /// ```
+  ///
   /// > RLS policy permissions required:
   /// > - `buckets` table permissions: `insert`
   /// > - `objects` table permissions: none
