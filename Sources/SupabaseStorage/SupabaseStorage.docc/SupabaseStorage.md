@@ -1,11 +1,5 @@
 # ``SupabaseStorage``
 
-Summary
-
-## Overview
-
-Text
-
 
 ## Topics
 

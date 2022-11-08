@@ -2,6 +2,10 @@
 
 ## Topics
 
+### Initalizing
+
+- ``init(url:headers:http:)``
+
 ### Creating A Bucket
 
 - ``StorageBucketApi/createBucket(id:isPublic:)``
