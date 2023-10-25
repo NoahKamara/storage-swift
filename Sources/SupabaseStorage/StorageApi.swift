@@ -6,6 +6,7 @@ import Foundation
 
 public class StorageApi {
   var url: String
+	var realURL: URL { URL(string: url)! }
   var headers: [String: String]
   var http: StorageHTTPClient
 
@@ -28,6 +29,35 @@ public class StorageApi {
     case patch = "PATCH"
   }
 
+	@discardableResult
+	internal func fetch<T: Decodable>(
+		url: URL,
+		method: HTTPMethod = .get,
+		parameters: [String: Any]?,
+		headers: [String: String]? = nil,
+		as type: T.Type = T.self
+	) async throws -> T {
+		var request = URLRequest(url: url)
+		request.httpMethod = method.rawValue
+		
+		if var headers = headers {
+			headers.merge(self.headers) { $1 }
+			request.allHTTPHeaderFields = headers
+		} else {
+			request.allHTTPHeaderFields = self.headers
+		}
+		
+		if let parameters = parameters {
+			request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+		}
+		
+		let (data, response) = try await http.fetch(request)
+		
+		let object = try JSONDecoder().decode(T.self, from: data)
+		
+		return object
+	}
+	
   @discardableResult
   internal func fetch(
     url: URL,
@@ -103,6 +133,22 @@ public class StorageApi {
     throw StorageError(message: "failed to get response")
   }
 
+//	private func decode<T: Decodable>(response: Data, statusCode: Int) throws -> T {
+//		// Check Response was a success
+//		guard statusCode == 200 || 200..<300 ~= statusCode else {
+//			
+//			throw decodeError(response: response, statusCode: In)
+//		}
+//		if statusCode == 200 || 200..<300 ~= statusCode {
+//			response
+//		} else if let dict = response as? [String: Any], let message = dict["message"] as? String {
+//			throw StorageError(statusCode: statusCode, message: message)
+//		} else if let dict = response as? [String: Any], let error = dict["error"] as? String {
+//			throw StorageError(statusCode: statusCode, message: error)
+//		} else {
+//			throw StorageError(statusCode: statusCode, message: "something went wrong")
+//		}
+//	}
   private func parse(response: Any, statusCode: Int) throws -> Any {
     if statusCode == 200 || 200..<300 ~= statusCode {
       return response

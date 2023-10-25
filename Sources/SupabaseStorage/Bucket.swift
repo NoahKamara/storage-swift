@@ -1,5 +1,7 @@
-public struct Bucket: Hashable {
-  public var id: String
+public struct Bucket: Hashable, Codable {
+	public typealias ID = String
+	
+  public var id: ID
   public var name: String
   public var owner: String
   public var isPublic: Bool
@@ -25,4 +27,44 @@ public struct Bucket: Hashable {
     self.createdAt = createdAt
     self.updatedAt = updatedAt
   }
+	
+	enum CodingKeys: String, CodingKey {
+		case id
+		case name
+		case owner
+		case isPublic = "public"
+		case createdAt = "created_at"
+		case updatedAt = "updated_at"
+	}
+}
+
+struct AssociatedValue<T:Decodable>: Decodable {
+	let key: String
+	let value: T
+	
+	struct CodingKeys: CodingKey {
+		let stringValue: String
+		let intValue: Int? = nil
+		init(stringValue: String) {
+			self.stringValue = stringValue
+		}
+		
+		init?(intValue: Int) {
+			return nil
+		}
+	}
+	
+	init(from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		
+		let keyCount = container.allKeys.count
+		
+		guard keyCount == 1, let key = container.allKeys.first else {
+			throw DecodingError.typeMismatch([String:Any].self, .init(codingPath: container.codingPath, debugDescription: "Expected one key, but found \(keyCount)"))
+		}
+		
+		
+		self.key = key.stringValue
+		self.value = try container.decode(T.self, forKey: key)
+	}
 }

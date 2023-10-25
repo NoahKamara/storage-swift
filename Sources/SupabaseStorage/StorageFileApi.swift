@@ -135,17 +135,13 @@ public class StorageFileApi: StorageApi {
       throw StorageError(message: "badURL")
     }
 
-    let response = try await fetch(
+	return try await fetch(
       url: url,
       method: .delete,
       parameters: ["prefixes": paths],
-      headers: headers
+      headers: headers,
+	  as: [FileObject].self
     )
-    guard let array = response as? [[String: Any]] else {
-      throw StorageError(message: "failed to parse response")
-    }
-
-    return array.compactMap { FileObject(from: $0) }
   }
 
   /// Lists all the files within a bucket.
@@ -172,14 +168,13 @@ public class StorageFileApi: StorageApi {
       ]
     }
 
-    let response = try await fetch(
-      url: url, method: .post, parameters: parameters, headers: headers)
-
-    guard let array = response as? [[String: Any]] else {
-      throw StorageError(message: "failed to parse response")
-    }
-
-    return array.compactMap { FileObject(from: $0) }
+	  return try await fetch(
+		url: url,
+		method: .post,
+		parameters: parameters,
+		headers: headers,
+		as: [FileObject].self
+	)
   }
 
   /// Downloads a file.
